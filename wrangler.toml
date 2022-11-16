@@ -5,6 +5,9 @@ route = ""
 workers_dev = true
 zone_id = ""
 compatibility_date = "2022-11-14"
+kv_namespaces = [
+  { binding = "todolist", id = "7c9848410fb44e63b4b4db1f3b51a4ec" }
+]
 
 [site]
 bucket = "./build"

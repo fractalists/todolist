@@ -10,17 +10,6 @@ import {
 } from 'react';
 import ReactDOM from 'react-dom';
 import styled from 'styled-components';
-import cloudFlareWorkersKV from '@kikobeats/cloudflare-workers-kv';
-
-export const readFrom = async (cache, path) => {
-  const data = await cache.get(path);
-  return JSON.parse(data);
-};
-
-export const writeTo = async (cache, path, data) => {
-  await cache.put(path, JSON.stringify(data));
-};
-
 
 const ITEM_TYPES = {
   CARD: "card",
@@ -113,13 +102,6 @@ const NewCard = styled.div `
 //   );
 // }
 
-
-const store = cloudFlareWorkersKV({
-  accountId: 'd5b568a800b5583bd423f1628d9dc009',
-  key: 'Bearer WG5-8_vvc3sfcbM9N0zMZnqoS4www5l8H5v7Xa5w',
-  namespaceId: '7c9848410fb44e63b4b4db1f3b51a4ec'
-})
-
 // async function examples () {
 //   // get a value
 //   await store.get('foo')
@@ -131,20 +113,35 @@ const store = cloudFlareWorkersKV({
 //   await store.delete('foo')
 // }
 
-const getValue = () => {
-  return store.get('todolist')
+function getValue() {
+  const request = new XMLHttpRequest();
+  request.open('GET', 'https://todo.franciszhang.org/data', false);  // `false` makes the request synchronous
+  request.send(null);
+
+  if (request.status === 200) {
+    console.log(request.responseText);
+    return request.responseText
+  }
 }
 
 async function saveValue(value) {
-  await store.set('todolist', JSON.stringify(value))
+  const requestOptions = {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'text/plain'
+    },
+    body: value
+  };
+  const response = await fetch('https://todo.franciszhang.org/data', requestOptions);
+  const status = response.status
+  console.log("saveValue status is: " + status)
 }
 
 
 function App() {
   const [dataset, ] = useState(() => {
-    const savedDataset = getValue();
-    const initialValue = JSON.parse(savedDataset);
-    return initialValue || DATASET;
+    const savedDataset = JSON.parse(getValue());
+    return savedDataset || DATASET;
   });
 
   const [tasks, setTasks] = useState(dataset.tasks);
@@ -152,11 +149,11 @@ function App() {
   const [cardOrder, setCardOrder] = useState(dataset.cardOrder);
 
   useEffect(() => {
-    saveValue({
+    saveValue(JSON.stringify({
       tasks,
       cards,
       cardOrder
-    });
+    }));
   }, [tasks, cards, cardOrder]);
 
   const onAddNewCard = () => {
