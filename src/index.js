@@ -117,7 +117,7 @@ async function updateTodos(value) {
 
 function App() {
   const [dataset, ] = useState(() => {
-    const savedDataset = getTodos();
+    const savedDataset = localStorage.getItem("aleka-trello-board-dataset");
     const initialValue = JSON.parse(savedDataset);
     return initialValue || DATASET;
   });
@@ -127,11 +127,10 @@ function App() {
   const [cardOrder, setCardOrder] = useState(dataset.cardOrder);
 
   useEffect(() => {
-    updateTodos(JSON.stringify({
-      tasks,
-      cards,
-      cardOrder
-    }));
+    localStorage.setItem(
+      "aleka-trello-board-dataset",
+      JSON.stringify({ tasks, cards, cardOrder })
+    );
   }, [tasks, cards, cardOrder]);
 
   const onAddNewCard = () => {
