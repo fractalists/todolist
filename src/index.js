@@ -1,7 +1,25 @@
-import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
-import { useState, useEffect, Fragment } from 'react';
+import {
+  DragDropContext,
+  Draggable,
+  Droppable
+} from 'react-beautiful-dnd';
+import {
+  useState,
+  useEffect,
+  Fragment
+} from 'react';
 import ReactDOM from 'react-dom';
 import styled from 'styled-components';
+import cloudFlareWorkersKV from '@kikobeats/cloudflare-workers-kv';
+
+export const readFrom = async (cache, path) => {
+  const data = await cache.get(path);
+  return JSON.parse(data);
+};
+
+export const writeTo = async (cache, path, data) => {
+  await cache.put(path, JSON.stringify(data));
+};
 
 
 const ITEM_TYPES = {
@@ -11,11 +29,26 @@ const ITEM_TYPES = {
 
 const DATASET = {
   tasks: {
-    "task-1": { id: "task-1", content: "water plants" },
-    "task-2": { id: "task-2", content: "buy oat milk" },
-    "task-3": { id: "task-3", content: "build a trello board" },
-    "task-4": { id: "task-4", content: "have a beach day" },
-    "task-5": { id: "task-5", content: "build tic tac toe" }
+    "task-1": {
+      id: "task-1",
+      content: "water plants"
+    },
+    "task-2": {
+      id: "task-2",
+      content: "buy oat milk"
+    },
+    "task-3": {
+      id: "task-3",
+      content: "build a trello board"
+    },
+    "task-4": {
+      id: "task-4",
+      content: "have a beach day"
+    },
+    "task-5": {
+      id: "task-5",
+      content: "build tic tac toe"
+    }
   },
   cards: {
     "card-1": {
@@ -28,13 +61,21 @@ const DATASET = {
       title: "Work Todos",
       taskIds: ["task-3"]
     },
-    "card-3": { id: "card-3", title: "Fun Todos", taskIds: ["task-4"] },
-    "card-4": { id: "card-4", title: "Completed", taskIds: ["task-5"] }
+    "card-3": {
+      id: "card-3",
+      title: "Fun Todos",
+      taskIds: ["task-4"]
+    },
+    "card-4": {
+      id: "card-4",
+      title: "Completed",
+      taskIds: ["task-5"]
+    }
   },
   cardOrder: ["card-1", "card-2", "card-3", "card-4"]
 };
 
-const Container = styled.div`
+const Container = styled.div `
   margin: 2em;
   display: flex;
   @media (max-width: 720px) {
@@ -43,25 +84,65 @@ const Container = styled.div`
   align-items: center;
   justify-items: center;
 `;
-const Menu = styled.div`
+const Menu = styled.div `
   margin: 2em;
   display: flex;
   flex-direction: column;
 `;
-const Note = styled.div`
+const Note = styled.div `
   font-size: 0.8em;
   margin: 20px 0;
 `;
-const NewCard = styled.div`
+const NewCard = styled.div `
   font-size: 1em;
   color: grey;
   min-width: 100px;
   text-align: center;
   cursor: pointer;
 `;
+
+
+// const getValue = () => {
+//   return localStorage.getItem("aleka-trello-board-dataset")
+// }
+
+// const saveValue = (value) => {
+//   localStorage.setItem(
+//     "aleka-trello-board-dataset",
+//     JSON.stringify(value)
+//   );
+// }
+
+
+const store = cloudFlareWorkersKV({
+  accountId: 'd5b568a800b5583bd423f1628d9dc009',
+  key: 'Bearer WG5-8_vvc3sfcbM9N0zMZnqoS4www5l8H5v7Xa5w',
+  namespaceId: '7c9848410fb44e63b4b4db1f3b51a4ec'
+})
+
+// async function examples () {
+//   // get a value
+//   await store.get('foo')
+
+//   // set a value forever
+//   await store.set('foo', 'bar')
+
+//   // delete a value
+//   await store.delete('foo')
+// }
+
+const getValue = () => {
+  return store.get('todolist')
+}
+
+async function saveValue(value) {
+  await store.set('todolist', JSON.stringify(value))
+}
+
+
 function App() {
   const [dataset, ] = useState(() => {
-    const savedDataset = localStorage.getItem("aleka-trello-board-dataset");
+    const savedDataset = getValue();
     const initialValue = JSON.parse(savedDataset);
     return initialValue || DATASET;
   });
@@ -71,10 +152,11 @@ function App() {
   const [cardOrder, setCardOrder] = useState(dataset.cardOrder);
 
   useEffect(() => {
-    localStorage.setItem(
-      "aleka-trello-board-dataset",
-      JSON.stringify({ tasks, cards, cardOrder })
-    );
+    saveValue({
+      tasks,
+      cards,
+      cardOrder
+    });
   }, [tasks, cards, cardOrder]);
 
   const onAddNewCard = () => {
@@ -92,37 +174,53 @@ function App() {
     setCardOrder(newCardOrder);
   };
 
-  return (
-    <Container>
-      <Menu>
-        <Note>
-          you can add, edit, or remove cards & tasks. <br />
-          double click to edit card title or task content. <br />
-          task is removed when content is empty. <br />
-          drag/drop card or task to desired order. <br />
-          your edited changes are saved in local storage.
-        </Note>
-        <NewCard onClick={onAddNewCard}>+ New Card</NewCard>
-      </Menu>
-      <DragDropCards
-        cards={cards}
-        tasks={tasks}
-        cardOrder={cardOrder}
-        setCards={setCards}
-        setTasks={setTasks}
-        setCardOrder={setCardOrder}
-      />
-    </Container>
+  return ( <
+    Container >
+    <
+    Menu >
+    <
+    Note >
+    you can add, edit, or remove cards & tasks. < br / >
+    double click to edit card title or task content. < br / >
+    task is removed when content is empty. < br / >
+    drag / drop card or task to desired order. < br / >
+    your edited changes are saved in local storage. <
+    /Note> <
+    NewCard onClick = {
+      onAddNewCard
+    } > +New Card < /NewCard> <
+    /Menu> <
+    DragDropCards cards = {
+      cards
+    }
+    tasks = {
+      tasks
+    }
+    cardOrder = {
+      cardOrder
+    }
+    setCards = {
+      setCards
+    }
+    setTasks = {
+      setTasks
+    }
+    setCardOrder = {
+      setCardOrder
+    }
+    /> <
+    /Container>
   );
 }
 
-const CardsContainer = styled.div`
+const CardsContainer = styled.div `
   margin: 2em;
   display: flex;
   @media (max-width: 720px) {
     flex-direction: column;
   }
 `;
+
 function DragDropCards({
   cards,
   tasks,
@@ -134,7 +232,12 @@ function DragDropCards({
   const [editing, setEditing] = useState(null);
 
   const onDragEnd = (result) => {
-    const { destination, source, draggableId, type } = result;
+    const {
+      destination,
+      source,
+      draggableId,
+      type
+    } = result;
 
     if (
       !destination ||
@@ -219,7 +322,13 @@ function DragDropCards({
     });
     const newTaskIds = Array.from(cards[cardID].taskIds);
     newTaskIds.push(newTask.id);
-    setCards({ ...cards, [cardID]: { ...cards[cardID], taskIds: newTaskIds } });
+    setCards({
+      ...cards,
+      [cardID]: {
+        ...cards[cardID],
+        taskIds: newTaskIds
+      }
+    });
   };
 
   const onRemoveCard = (cardID) => {
@@ -235,7 +344,13 @@ function DragDropCards({
 
   const onRemoveTask = (taskID, cardID) => {
     const newTaskIds = cards[cardID].taskIds.filter((id) => id !== taskID);
-    setCards({ ...cards, [cardID]: { ...cards[cardID], taskIds: newTaskIds } });
+    setCards({
+      ...cards,
+      [cardID]: {
+        ...cards[cardID],
+        taskIds: newTaskIds
+      }
+    });
     delete tasks[taskID];
     setTasks(tasks);
   };
@@ -259,63 +374,101 @@ function DragDropCards({
     } else if (newContent !== tasks[taskID].content) {
       setTasks({
         ...tasks,
-        [taskID]: { ...tasks[taskID], content: newContent }
+        [taskID]: {
+          ...tasks[taskID],
+          content: newContent
+        }
       });
     }
     setEditing(null);
   };
 
-  return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <Droppable droppableId="all-cards" direction="horizontal" type="card">
-        {(provided) => (
-          <CardsContainer {...provided.droppableProps} ref={provided.innerRef}>
-            {cardOrder.map((id, index) => {
-              const card = cards[id];
-              const cardTasks = card.taskIds.map((taskId) => tasks[taskId]);
-              return (
-                <Card
-                  key={card.id}
-                  card={card}
-                  tasks={cardTasks}
-                  index={index}
-                  onSaveTitleEdit={(title) => onSaveTitleEdit(card.id, title)}
-                  onRemoveCard={() => onRemoveCard(card.id)}
-                  onAddNewTask={(content) => onAddNewTask(card.id, content)}
-                  onSaveTaskEdit={(taskID, newContent) =>
-                    onSaveTaskEdit(taskID, card.id, newContent)
-                  }
-                  onTitleDoubleClick={() => setEditing(card.id)}
-                  onTaskDoubleClick={(task) => setEditing(task.id)}
-                  isTitleEditing={editing === card.id}
-                  isTaskEditing={(task) => editing === task.id}
-                />
-              );
-            })}
-            {provided.placeholder}
-          </CardsContainer>
-        )}
-      </Droppable>
-    </DragDropContext>
+  return ( <
+    DragDropContext onDragEnd = {
+      onDragEnd
+    } >
+    <
+    Droppable droppableId = "all-cards"
+    direction = "horizontal"
+    type = "card" > {
+      (provided) => ( <
+        CardsContainer {
+          ...provided.droppableProps
+        }
+        ref = {
+          provided.innerRef
+        } > {
+          cardOrder.map((id, index) => {
+            const card = cards[id];
+            const cardTasks = card.taskIds.map((taskId) => tasks[taskId]);
+            return ( <
+              Card key = {
+                card.id
+              }
+              card = {
+                card
+              }
+              tasks = {
+                cardTasks
+              }
+              index = {
+                index
+              }
+              onSaveTitleEdit = {
+                (title) => onSaveTitleEdit(card.id, title)
+              }
+              onRemoveCard = {
+                () => onRemoveCard(card.id)
+              }
+              onAddNewTask = {
+                (content) => onAddNewTask(card.id, content)
+              }
+              onSaveTaskEdit = {
+                (taskID, newContent) =>
+                onSaveTaskEdit(taskID, card.id, newContent)
+              }
+              onTitleDoubleClick = {
+                () => setEditing(card.id)
+              }
+              onTaskDoubleClick = {
+                (task) => setEditing(task.id)
+              }
+              isTitleEditing = {
+                editing === card.id
+              }
+              isTaskEditing = {
+                (task) => editing === task.id
+              }
+              />
+            );
+          })
+        } {
+          provided.placeholder
+        } <
+        /CardsContainer>
+      )
+    } <
+    /Droppable> <
+    /DragDropContext>
   );
 }
 
-const TitleBar = styled.div`
+const TitleBar = styled.div `
   display: flex;
   justify-content: space-between;
 `;
-const Title = styled.h3`
+const Title = styled.h3 `
   padding: 8px;
   font-size: 1.5em;
   text-overflow: ellipsis;
 `;
-const Cross = styled.div`
+const Cross = styled.div `
   padding: 8px 12px;
   cursor: pointer;
   text-align: right;
   color: grey;
 `;
-const CardContainer = styled.div`
+const CardContainer = styled.div `
   margin: 8px;
   border: 1px solid lightgrey;
   border-radius: 4px;
@@ -324,17 +477,17 @@ const CardContainer = styled.div`
   flex-direction: column;
   background-color: white;
 `;
-const TaskList = styled.div`
+const TaskList = styled.div `
   padding: 8px;
   background-color: ${(props) =>
     props.isDraggingOver ? "skyblue" : "inherit"};
   min-height: 100px;
   height: 100%;
 `;
-const NewTaskBar = styled.div`
+const NewTaskBar = styled.div `
   display: flex;
 `;
-const NewTaskButton = styled.div`
+const NewTaskButton = styled.div `
   padding: 8px;
   margin: 8px;
   cursor: pointer;
@@ -351,82 +504,128 @@ function Card(props) {
     setIsAddingNewTask(false);
   };
 
-  return (
-    <Draggable draggableId={props.card.id} index={props.index}>
-      {(provided) => (
-        <CardContainer
-          ref={provided.innerRef}
-          {...provided.draggableProps}
-          id={props.card.id}
-        >
-          <TitleBar>
-            {props.isTitleEditing ? (
-              <EditInput
-                key={props.card.id}
-                value={props.card.title}
-                onSave={props.onSaveTitleEdit}
-                fontSize="1.5em"
-                margin="20px 0 20px 8px"
-              />
-            ) : (
-              <Title
-                onDoubleClick={props.onTitleDoubleClick}
-                {...provided.dragHandleProps}
-              >
-                {props.card.title}
-              </Title>
-            )}
-            <Cross onClick={props.onRemoveCard}>x</Cross>
-          </TitleBar>
-          <Droppable droppableId={props.card.id} type="task">
-            {(provided, snapshot) => (
-              <Fragment>
-                <TaskList
-                  ref={provided.innerRef}
-                  {...provided.droppableProps}
-                  isDraggingOver={snapshot.isDraggingOver}
-                >
-                  {props.tasks.map((task, index) => (
-                    <Task
-                      key={task.id}
-                      task={task}
-                      index={index}
-                      onSaveTaskEdit={(content) =>
-                        props.onSaveTaskEdit(task.id, content)
-                      }
-                      onTaskDoubleClick={() => props.onTaskDoubleClick(task)}
-                      isTaskEditing={props.isTaskEditing(task)}
-                    />
-                  ))}
-                </TaskList>
-                {provided.placeholder}
-              </Fragment>
-            )}
-          </Droppable>
-          <NewTaskBar>
-            {isAddingNewTask ? (
-              <EditInput
-                key="newtask"
-                value=""
-                onSave={onSaveTask}
-                margin="8px"
-              />
-            ) : (
-              <NewTaskButton onClick={() => setIsAddingNewTask(true)}>
-                + New Task
-              </NewTaskButton>
-            )}
-          </NewTaskBar>
-        </CardContainer>
-      )}
-    </Draggable>
+  return ( <
+    Draggable draggableId = {
+      props.card.id
+    }
+    index = {
+      props.index
+    } > {
+      (provided) => ( <
+        CardContainer ref = {
+          provided.innerRef
+        } {
+          ...provided.draggableProps
+        }
+        id = {
+          props.card.id
+        } >
+        <
+        TitleBar > {
+          props.isTitleEditing ? ( <
+            EditInput key = {
+              props.card.id
+            }
+            value = {
+              props.card.title
+            }
+            onSave = {
+              props.onSaveTitleEdit
+            }
+            fontSize = "1.5em"
+            margin = "20px 0 20px 8px" /
+            >
+          ) : ( <
+            Title onDoubleClick = {
+              props.onTitleDoubleClick
+            } {
+              ...provided.dragHandleProps
+            } >
+            {
+              props.card.title
+            } <
+            /Title>
+          )
+        } <
+        Cross onClick = {
+          props.onRemoveCard
+        } > x < /Cross> <
+        /TitleBar> <
+        Droppable droppableId = {
+          props.card.id
+        }
+        type = "task" > {
+          (provided, snapshot) => ( <
+            Fragment >
+            <
+            TaskList ref = {
+              provided.innerRef
+            } {
+              ...provided.droppableProps
+            }
+            isDraggingOver = {
+              snapshot.isDraggingOver
+            } >
+            {
+              props.tasks.map((task, index) => ( <
+                Task key = {
+                  task.id
+                }
+                task = {
+                  task
+                }
+                index = {
+                  index
+                }
+                onSaveTaskEdit = {
+                  (content) =>
+                  props.onSaveTaskEdit(task.id, content)
+                }
+                onTaskDoubleClick = {
+                  () => props.onTaskDoubleClick(task)
+                }
+                isTaskEditing = {
+                  props.isTaskEditing(task)
+                }
+                />
+              ))
+            } <
+            /TaskList> {
+              provided.placeholder
+            } <
+            /Fragment>
+          )
+        } <
+        /Droppable> <
+        NewTaskBar > {
+          isAddingNewTask ? ( <
+            EditInput key = "newtask"
+            value = ""
+            onSave = {
+              onSaveTask
+            }
+            margin = "8px" /
+            >
+          ) : ( <
+            NewTaskButton onClick = {
+              () => setIsAddingNewTask(true)
+            } >
+            +New Task <
+            /NewTaskButton>
+          )
+        } <
+        /NewTaskBar> <
+        /CardContainer>
+      )
+    } <
+    /Draggable>
   );
 }
 
-const TaskContainer = styled.div`
+const TaskContainer = styled.div `
   display: flex;
 `;
-const TaskContent = styled.div`
+const TaskContent = styled.div `
   border: 1px solid lightgrey;
   padding: 8px;
   margin-bottom: 8px;
@@ -434,65 +633,98 @@ const TaskContent = styled.div`
   background-color: ${(props) => (props.isDragging ? "lightgreen" : "white")};
   width: 100%;
 `;
+
 function Task(props) {
-  return (
-    <TaskContainer>
-      {props.isTaskEditing ? (
-        <EditInput
-          key={props.task.id}
-          value={props.task.content}
-          onSave={props.onSaveTaskEdit}
-          margin="0 0 8px 0"
-        />
-      ) : (
-        <Draggable draggableId={props.task.id} index={props.index}>
-          {(provided, snapshot) => (
-            <TaskContent
-              {...provided.draggableProps}
-              {...provided.dragHandleProps}
-              ref={provided.innerRef}
-              isDragging={snapshot.isDragging}
-              onDoubleClick={props.onTaskDoubleClick}
-            >
-              {props.task.content}
-            </TaskContent>
-          )}
-        </Draggable>
-      )}
-    </TaskContainer>
+  return ( <
+    TaskContainer > {
+      props.isTaskEditing ? ( <
+        EditInput key = {
+          props.task.id
+        }
+        value = {
+          props.task.content
+        }
+        onSave = {
+          props.onSaveTaskEdit
+        }
+        margin = "0 0 8px 0" /
+        >
+      ) : ( <
+        Draggable draggableId = {
+          props.task.id
+        }
+        index = {
+          props.index
+        } > {
+          (provided, snapshot) => ( <
+            TaskContent {
+              ...provided.draggableProps
+            } {
+              ...provided.dragHandleProps
+            }
+            ref = {
+              provided.innerRef
+            }
+            isDragging = {
+              snapshot.isDragging
+            }
+            onDoubleClick = {
+              props.onTaskDoubleClick
+            } >
+            {
+              props.task.content
+            } <
+            /TaskContent>
+          )
+        } <
+        /Draggable>
+      )
+    } <
+    /TaskContainer>
   );
 }
 
-const Input = styled.input`
+const Input = styled.input `
   font-size: ${(props) => props.fontSize || "inherit"};
   font-family: inherit;
   margin: ${(props) => props.margin || "inherit"};
   padding: 8px;
   width: 100%;
 `;
+
 function EditInput(props) {
   const [val, setVal] = useState(props.value);
-  return (
-    <Input
-      type="text"
-      autoFocus
-      value={val}
-      onChange={(e) => setVal(e.target.value)}
-      onKeyPress={(event) => {
+  return ( <
+    Input type = "text"
+    autoFocus value = {
+      val
+    }
+    onChange = {
+      (e) => setVal(e.target.value)
+    }
+    onKeyPress = {
+      (event) => {
         if (event.key === "Enter" || event.key === "Escape") {
           props.onSave(val);
           event.preventDefault();
           event.stopPropagation();
         }
-      }}
-      onBlur={() => props.onSave(val)}
-      fontSize={props.fontSize}
-      margin={props.margin}
+      }
+    }
+    onBlur = {
+      () => props.onSave(val)
+    }
+    fontSize = {
+      props.fontSize
+    }
+    margin = {
+      props.margin
+    }
     />
   );
 }
 
-ReactDOM.render(<App />, document.getElementById("root"));
+ReactDOM.render( < App / > , document.getElementById("root"));
 
 function genRandomID() {
   return (Math.random() + 1).toString(36).substring(7);
