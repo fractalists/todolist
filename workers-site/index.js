@@ -11,7 +11,7 @@ async function getTodos() {
 }
 
 async function updateTodos(request) {
-  const data = request.text()
+  const data = await request.text()
   console.log(data)
   try {
     await todolist.put('todolist', data)

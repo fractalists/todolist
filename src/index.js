@@ -90,30 +90,7 @@ const NewCard = styled.div `
   cursor: pointer;
 `;
 
-
-// const getValue = () => {
-//   return localStorage.getItem("aleka-trello-board-dataset")
-// }
-
-// const saveValue = (value) => {
-//   localStorage.setItem(
-//     "aleka-trello-board-dataset",
-//     JSON.stringify(value)
-//   );
-// }
-
-// async function examples () {
-//   // get a value
-//   await store.get('foo')
-
-//   // set a value forever
-//   await store.set('foo', 'bar')
-
-//   // delete a value
-//   await store.delete('foo')
-// }
-
-function getValue() {
+function getTodos() {
   const request = new XMLHttpRequest();
   request.open('GET', 'https://todo.franciszhang.org/data', false);  // `false` makes the request synchronous
   request.send(null);
@@ -124,7 +101,7 @@ function getValue() {
   }
 }
 
-async function saveValue(value) {
+async function updateTodos(value) {
   const requestOptions = {
     method: 'PUT',
     headers: {
@@ -140,8 +117,9 @@ async function saveValue(value) {
 
 function App() {
   const [dataset, ] = useState(() => {
-    const savedDataset = JSON.parse(getValue());
-    return savedDataset || DATASET;
+    const savedDataset = getTodos();
+    const initialValue = JSON.parse(savedDataset);
+    return initialValue || DATASET;
   });
 
   const [tasks, setTasks] = useState(dataset.tasks);
@@ -149,7 +127,7 @@ function App() {
   const [cardOrder, setCardOrder] = useState(dataset.cardOrder);
 
   useEffect(() => {
-    saveValue(JSON.stringify({
+    updateTodos(JSON.stringify({
       tasks,
       cards,
       cardOrder
