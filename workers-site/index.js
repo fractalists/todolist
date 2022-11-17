@@ -25,7 +25,7 @@ async function updateTodos(request) {
     console.log("current data version: " + JSON.parse(currentData).version)
 
     if (JSON.parse(newData).version <= JSON.parse(currentData).version) {
-      return new Response(`version is too old`, { status: 500, statusText: "version is too old" })
+      return new Response(`version is too old`, { status: 400, statusText: "version is too old" })
     }
 
     await todolist.put('todolist', newData)
