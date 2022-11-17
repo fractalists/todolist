@@ -1,12 +1,11 @@
 account_id = "d5b568a800b5583bd423f1628d9dc009"
 name = "todolist"
-route = ""
 workers_dev = true
 compatibility_date = "2022-11-14"
-main = "workers-site\index.js"
 kv_namespaces = [
   { binding = "todolist", id = "7c9848410fb44e63b4b4db1f3b51a4ec" }
 ]
 
 [site]
 bucket = "./build"
+entry-point = "workers-site"

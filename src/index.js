@@ -31,7 +31,8 @@ const DATASET = {
     "card-3": { id: "card-3", title: "Fun Todos", taskIds: ["task-4"] },
     "card-4": { id: "card-4", title: "Completed", taskIds: ["task-5"] }
   },
-  cardOrder: ["card-1", "card-2", "card-3", "card-4"]
+  cardOrder: ["card-1", "card-2", "card-3", "card-4"],
+  version: 0
 };
 
 const Container = styled.div`
@@ -80,18 +81,33 @@ function getTodos() {
   }
 }
 
-async function updateTodos(value) {
-  localStorage.setItem(localStorageKey, value);
+async function updateTodos(newData) {
+  let currentValue = localStorage.getItem(localStorageKey);
+  let currentVersion = JSON.parse(currentValue).version;
+  newData.version = currentVersion + 1;
+  console.log("current version is: " + currentVersion);
+  localStorage.setItem(localStorageKey, JSON.stringify(newData));
+
   const requestOptions = {
     method: 'PUT',
     headers: {
       'Content-Type': 'text/plain'
     },
-    body: value
+    body: newData
   };
-  const response = await fetch('https://todo.franciszhang.org/data', requestOptions);
-  const status = response.status
-  console.log("saveValue status is: " + status)
+
+  try {
+    const response = await fetch('https://todo.franciszhang.org/data', requestOptions);
+    const status = response.status
+    console.log("saveValue status is: " + status)
+    if (status !== 200) {
+      alert(response.text);
+      return
+    }
+  } catch (e) {
+    alert("network error: " + e.toString());
+  }
+
 }
 
 
@@ -104,14 +120,14 @@ function App() {
 
   const [tasks, setTasks] = useState(dataset.tasks);
   const [cards, setCards] = useState(dataset.cards);
-  const [cardOrder, setCardOrder] = useState(dataset.cardOrder);
+  const [cardOrder, setCardOrder] = useState(dataset.cardOrder)
 
   useEffect(() => {
-    updateTodos(JSON.stringify({
+    updateTodos({
       tasks,
       cards,
       cardOrder
-    }));
+    });
   }, [tasks, cards, cardOrder]);
 
   const onAddNewCard = () => {
@@ -352,7 +368,7 @@ const CardContainer = styled.div`
   margin: 5px;
   border: 1px solid Gainsboro;
   border-radius: 4px;
-  width: 170px;
+  width: 180px;
   display: flex;
   flex-direction: column;
   background-color: white;
