@@ -35,13 +35,14 @@ const DATASET = {
 };
 
 const Container = styled.div`
-  margin: 2em;
+  margin: 1em;
   display: flex;
   @media (max-width: 720px) {
     flex-direction: column;
   }
   align-items: center;
   justify-items: center;
+  font-family: Helvetica, Arial, sans-serif;
 `;
 const Menu = styled.div`
   margin: 2em;
@@ -117,11 +118,11 @@ function App() {
   const onAddNewCard = () => {
     const newCard = {
       id: "card-" + genRandomID(),
-      title: "**New**",
+      title: "New Task List",
       taskIds: []
     };
     const newCardOrder = Array.from(cardOrder);
-    newCardOrder.unshift(newCard.id);
+    newCardOrder.push(newCard.id);
     setCards({
       ...cards,
       [newCard.id]: newCard
@@ -131,16 +132,6 @@ function App() {
 
   return (
     <Container>
-      <Menu>
-        <Note>
-          you can add, edit, or remove cards & tasks. <br />
-          double click to edit card title or task content. <br />
-          task is removed when content is empty. <br />
-          drag/drop card or task to desired order. <br />
-          your edited changes are saved in local storage.
-        </Note>
-        <NewCard onClick={onAddNewCard}>+ New Card</NewCard>
-      </Menu>
       <DragDropCards
         cards={cards}
         tasks={tasks}
@@ -149,12 +140,15 @@ function App() {
         setTasks={setTasks}
         setCardOrder={setCardOrder}
       />
+      <Menu>
+        <NewCard onClick={onAddNewCard}>+ New Card</NewCard>
+      </Menu>
     </Container>
   );
 }
 
 const CardsContainer = styled.div`
-  margin: 2em;
+  margin: 1em;
   display: flex;
   @media (max-width: 720px) {
     flex-direction: column;
@@ -341,10 +335,12 @@ const TitleBar = styled.div`
   display: flex;
   justify-content: space-between;
 `;
-const Title = styled.h3`
+const Title = styled.div`
+  margin: 5px 0 0px 0px;
   padding: 8px;
   font-size: 1.5em;
   text-overflow: ellipsis;
+  color: Brown;
 `;
 const Cross = styled.div`
   padding: 8px 12px;
@@ -353,7 +349,7 @@ const Cross = styled.div`
   color: grey;
 `;
 const CardContainer = styled.div`
-  margin: 8px;
+  margin: 5px;
   border: 1px solid lightgrey;
   border-radius: 4px;
   width: 220px;
@@ -364,7 +360,7 @@ const CardContainer = styled.div`
 const TaskList = styled.div`
   padding: 8px;
   background-color: ${(props) =>
-    props.isDraggingOver ? "skyblue" : "inherit"};
+    props.isDraggingOver ? "WhiteSmoke" : "inherit"};
   min-height: 100px;
   height: 100%;
 `;
@@ -373,7 +369,7 @@ const NewTaskBar = styled.div`
 `;
 const NewTaskButton = styled.div`
   padding: 8px;
-  margin: 8px;
+  margin: 3px;
   cursor: pointer;
   text-align: right;
   color: grey;
@@ -468,7 +464,7 @@ const TaskContent = styled.div`
   padding: 8px;
   margin-bottom: 8px;
   border-radius: 2px;
-  background-color: ${(props) => (props.isDragging ? "lightgreen" : "white")};
+  background-color: ${(props) => (props.isDragging ? "AliceBlue" : "white")};
   width: 100%;
 `;
 function Task(props) {
