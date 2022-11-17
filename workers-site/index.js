@@ -13,15 +13,15 @@ async function getTodos() {
 async function updateTodos(request) {
   const newData = await request.text()
   console.log(newData)
-
   const currentData = await todolist.get('todolist')
-  if (JSON.parse(newData).version <= JSON.parse(currentData).version) {
-    return new Response("version is too old", { status: 500 })
-  }
-
   try {
+    if (JSON.parse(newData).version <= JSON.parse(currentData).version) {
+      return new Response("version is too old", { status: 500 })
+    }
+
     await todolist.put('todolist', newData)
     return new Response(newData, { status: 200 })
+
   } catch (err) {
     return new Response(err, { status: 500 })
   }

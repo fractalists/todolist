@@ -104,8 +104,8 @@ async function updateTodos(newData) {
       alert(response.text);
       return
     }
-  } catch (e) {
-    alert("network error: " + e.toString());
+  } catch (err) {
+    alert("network error: " + err.toString());
   }
 
 }
