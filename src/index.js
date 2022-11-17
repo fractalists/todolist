@@ -48,10 +48,10 @@ const Menu = styled.div`
   display: flex;
   flex-direction: column;
 `;
-const Note = styled.div`
-  font-size: 0.8em;
-  margin: 20px 0;
-`;
+// const Note = styled.div`
+//   font-size: 0.8em;
+//   margin: 20px 0;
+// `;
 const NewCard = styled.div`
   font-size: 1em;
   color: grey;
@@ -334,11 +334,13 @@ const TitleBar = styled.div`
   justify-content: space-between;
 `;
 const Title = styled.div`
-  margin: 5px 0 0px 0px;
+  margin: 5px 0px 0px 0px;
   padding: 8px;
   font-size: 1.5em;
   text-overflow: ellipsis;
   color: Brown;
+  border: 1px solid transparent;
+  borderRadius: 2px;
 `;
 const Cross = styled.div`
   padding: 8px 12px;
@@ -396,8 +398,12 @@ function Card(props) {
                 key={props.card.id}
                 value={props.card.title}
                 onSave={props.onSaveTitleEdit}
+                margin="5px 0px 0px 0px"
+                padding="8px"
                 fontSize="1.5em"
-                margin="20px 0 20px 8px"
+                color="Brown"
+                border="1px solid"
+                borderRadius="2px"
               />
             ) : (
               <Title
@@ -473,7 +479,10 @@ function Task(props) {
           key={props.task.id}
           value={props.task.content}
           onSave={props.onSaveTaskEdit}
+          padding="8px"
           margin="0 0 8px 0"
+          border="1px solid"
+          borderRadius="2px"
         />
       ) : (
         <Draggable draggableId={props.task.id} index={props.index}>
@@ -498,8 +507,11 @@ const Input = styled.input`
   font-size: ${(props) => props.fontSize || "inherit"};
   font-family: inherit;
   margin: ${(props) => props.margin || "inherit"};
-  padding: 8px;
+  padding: ${(props) => props.padding || "inherit"};
   width: 100%;
+  color: ${(props) => props.color || "inherit"};
+  border: ${(props) => props.border || "inherit"};
+  borderRadius: ${(props) => props.borderRadius || "inherit"};
 `;
 function EditInput(props) {
   const [val, setVal] = useState(props.value);
@@ -519,6 +531,10 @@ function EditInput(props) {
       onBlur={() => props.onSave(val)}
       fontSize={props.fontSize}
       margin={props.margin}
+      padding={props.padding}
+      color={props.color}
+      border={props.border}
+      borderRadius={props.borderRadius}
     />
   );
 }
