@@ -82,9 +82,16 @@ function getTodos() {
 }
 
 async function updateTodos(newData) {
-  let currentValue = localStorage.getItem(localStorageKey);
-  let currentVersion = JSON.parse(currentValue).version;
+  let currentDataStr = localStorage.getItem(localStorageKey);
+  let currentData = JSON.parse(currentDataStr);
+  let currentVersion = currentData.version;
+  delete currentData['version'];
+  
   console.log("current version is: " + currentVersion);
+
+  if (JSON.stringify(currentData) === JSON.stringify(newData)) {
+    return
+  }
 
   newData.version = currentVersion + 1;
   let newDataStr = JSON.stringify(newData)
@@ -102,7 +109,7 @@ async function updateTodos(newData) {
     const status = response.status
     console.log("saveValue status is: " + status)
     if (status !== 200) {
-      alert(response.statusText);
+      alert("failed to save changes");
     } else {
       localStorage.setItem(localStorageKey, newDataStr);
     }
