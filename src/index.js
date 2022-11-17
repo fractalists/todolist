@@ -60,18 +60,28 @@ const NewCard = styled.div`
   cursor: pointer;
 `;
 
+var synced = false
+const localStorageKey = "franciszhang-todolist"
+
 function getTodos() {
+  if (synced) {
+    return localStorage.getItem(localStorageKey);
+  }
+
   const request = new XMLHttpRequest();
   request.open('GET', 'https://todo.franciszhang.org/data', false);  // `false` makes the request synchronous
   request.send(null);
 
   if (request.status === 200) {
     console.log(request.responseText);
+    localStorage.setItem(localStorageKey, request.responseText);
+    synced = true
     return request.responseText
   }
 }
 
 async function updateTodos(value) {
+  localStorage.setItem(localStorageKey, value);
   const requestOptions = {
     method: 'PUT',
     headers: {
