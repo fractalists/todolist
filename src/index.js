@@ -36,8 +36,8 @@ const DATASET = {
 
 const Container = styled.div`
   display: flex;
-  @media (max-width: 720px) {
-    flex-direction: column;
+  @media (max-width: 4096px) {
+    flex-flow: row wrap;
   }
   align-items: center;
   justify-items: center;
@@ -46,7 +46,7 @@ const Container = styled.div`
 const Menu = styled.div`
   margin: 2em;
   display: flex;
-  flex-direction: column;
+  flex-flow: row wrap;
 `;
 // const Note = styled.div`
 //   font-size: 0.8em;
@@ -55,7 +55,7 @@ const Menu = styled.div`
 const NewCard = styled.div`
   font-size: 1em;
   color: grey;
-  min-width: 100px;
+  min-width: 200px;
   text-align: center;
   cursor: pointer;
 `;
@@ -148,8 +148,8 @@ function App() {
 
 const CardsContainer = styled.div`
   display: flex;
-  @media (max-width: 720px) {
-    flex-direction: column;
+  @media (max-width: 4096px) {
+    flex-flow: row wrap;
   }
 `;
 function DragDropCards({
