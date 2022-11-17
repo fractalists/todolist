@@ -55,9 +55,9 @@ const Menu = styled.div`
 const NewCard = styled.div`
   font-size: 1em;
   color: grey;
-  min-width: 200px;
-  text-align: center;
+  text-align: left;
   cursor: pointer;
+  font-size: 1em;
 `;
 
 var synced = false
@@ -334,9 +334,9 @@ const TitleBar = styled.div`
   justify-content: space-between;
 `;
 const Title = styled.div`
-  margin: 5px 0px 0px 0px;
+  margin: 5px 0px 0px 5px;
   padding: 8px;
-  font-size: 1.5em;
+  font-size: 1em;
   text-overflow: ellipsis;
   color: Brown;
   border: 1px solid transparent;
@@ -350,9 +350,9 @@ const Cross = styled.div`
 `;
 const CardContainer = styled.div`
   margin: 5px;
-  border: 1px solid lightgrey;
+  border: 1px solid Gainsboro;
   border-radius: 4px;
-  width: 220px;
+  width: 170px;
   display: flex;
   flex-direction: column;
   background-color: white;
@@ -373,6 +373,7 @@ const NewTaskButton = styled.div`
   cursor: pointer;
   text-align: right;
   color: grey;
+  font-size: 0.7em;
 `;
 
 function Card(props) {
@@ -398,9 +399,9 @@ function Card(props) {
                 key={props.card.id}
                 value={props.card.title}
                 onSave={props.onSaveTitleEdit}
-                margin="5px 0px 0px 0px"
+                margin="5px 0px 0px 5px"
                 padding="8px"
-                fontSize="1.5em"
+                fontSize="1em"
                 color="Brown"
                 border="1px solid"
                 borderRadius="2px"
@@ -446,7 +447,11 @@ function Card(props) {
                 key="newtask"
                 value=""
                 onSave={onSaveTask}
-                margin="8px"
+                padding="8px"
+                margin="0px 5px 8px 5px"
+                border="1px solid"
+                borderRadius="2px"
+                fontSize="0.7em"
               />
             ) : (
               <NewTaskButton onClick={() => setIsAddingNewTask(true)}>
@@ -464,12 +469,13 @@ const TaskContainer = styled.div`
   display: flex;
 `;
 const TaskContent = styled.div`
-  border: 1px solid lightgrey;
+  border: 1px solid Gainsboro;
   padding: 8px;
   margin-bottom: 8px;
   border-radius: 2px;
   background-color: ${(props) => (props.isDragging ? "AliceBlue" : "white")};
   width: 100%;
+  font-size: 0.7em;
 `;
 function Task(props) {
   return (
@@ -483,6 +489,7 @@ function Task(props) {
           margin="0 0 8px 0"
           border="1px solid"
           borderRadius="2px"
+          fontSize="0.7em"
         />
       ) : (
         <Draggable draggableId={props.task.id} index={props.index}>
