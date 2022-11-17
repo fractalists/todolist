@@ -85,15 +85,16 @@ async function updateTodos(newData) {
   let currentValue = localStorage.getItem(localStorageKey);
   let currentVersion = JSON.parse(currentValue).version;
   newData.version = currentVersion + 1;
+  let newDataStr = JSON.stringify(newData)
   console.log("current version is: " + currentVersion);
-  localStorage.setItem(localStorageKey, JSON.stringify(newData));
+  localStorage.setItem(localStorageKey, newDataStr);
 
   const requestOptions = {
     method: 'PUT',
     headers: {
       'Content-Type': 'text/plain'
     },
-    body: newData
+    body: newDataStr
   };
 
   try {
@@ -101,8 +102,7 @@ async function updateTodos(newData) {
     const status = response.status
     console.log("saveValue status is: " + status)
     if (status !== 200) {
-      alert(response.text);
-      return
+      alert(await response.statusText);
     }
   } catch (err) {
     alert("network error: " + err.toString());

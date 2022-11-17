@@ -3,20 +3,29 @@ import {
 } from "@cloudflare/kv-asset-handler";
 
 async function getTodos() {
-  const data = await todolist.get('todolist')
-  console.log(data)
-  return new Response(data, {
-    headers: { 'Content-Type': 'text/plain' },
-  })
+  try {
+    const data = await todolist.get('todolist')
+    console.log(data)
+    return new Response(data, {
+      headers: { 'Content-Type': 'text/plain' },
+    })
+
+  } catch (err) {
+    return new Response(err, { status: 500 })
+  }
 }
 
 async function updateTodos(request) {
-  const newData = await request.text()
-  console.log(newData)
-  const currentData = await todolist.get('todolist')
   try {
+    const newData = await request.text()
+    console.log(newData)
+    const currentData = await todolist.get('todolist')
+
+    console.log("new data version: " + JSON.parse(newData).version)
+    console.log("current data version: " + JSON.parse(currentData).version)
+
     if (JSON.parse(newData).version <= JSON.parse(currentData).version) {
-      return new Response("version is too old", { status: 500 })
+      return new Response(`version is too old`, { status: 500, statusText: "version is too old" })
     }
 
     await todolist.put('todolist', newData)
