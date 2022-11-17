@@ -1,6 +1,6 @@
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import { useState, useEffect, Fragment } from 'react';
-import ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import styled from 'styled-components';
 
 
@@ -35,7 +35,6 @@ const DATASET = {
 };
 
 const Container = styled.div`
-  margin: 1em;
   display: flex;
   @media (max-width: 720px) {
     flex-direction: column;
@@ -148,7 +147,6 @@ function App() {
 }
 
 const CardsContainer = styled.div`
-  margin: 1em;
   display: flex;
   @media (max-width: 720px) {
     flex-direction: column;
@@ -525,7 +523,9 @@ function EditInput(props) {
   );
 }
 
-ReactDOM.render(<App />, document.getElementById("root"));
+const container = document.getElementById('root');
+const root = createRoot(container);
+root.render(<App />);
 
 function genRandomID() {
   return (Math.random() + 1).toString(36).substring(7);
