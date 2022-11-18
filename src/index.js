@@ -40,7 +40,7 @@ const DATASET = [{
 const Container = styled.div`
   display: flex;
   @media (max-width: 4096px) {
-    flex-flow: row wrap;
+    flex-flow: column wrap;
   }
   justify-items: center;
   font-family: Helvetica, Arial, sans-serif;
