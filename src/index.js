@@ -197,30 +197,39 @@ function DragDropCards({
   const onDragEnd = (result) => {
     const { destination, source, draggableId, type } = result;
 
-    if (
-      !destination ||
-      (destination.droppableId === source.droppableId &&
-        destination.index === source.index)
-    ) {
+    if (type === ITEM_TYPES.CARD) {
+      if (!destination || 
+        (destination.droppableId === source.droppableId &&
+        destination.index === source.index)) {
+        return;
+      }
+      reorderCards(source, destination, draggableId);
+      return;
+    }
+    
+    // type === tasks
+    if (!destination) {
+      let card = cards[source.droppableId];
+      onRemoveTask(Array.from(card.taskIds)[source.index], card.id)
       return;
     }
 
-    if (type === ITEM_TYPES.CARD) {
-      reorderCards(source, destination, draggableId);
+    if (destination.droppableId === source.droppableId &&
+        destination.index === source.index) {
+      return;
+    }
+
+    const start = cards[source.droppableId];
+    const finish = cards[destination.droppableId];
+    if (start.id === finish.id) {
+      reorderTasksWithinCard(
+        start,
+        source.index,
+        destination.index,
+        draggableId
+      );
     } else {
-      // type === tasks
-      const start = cards[source.droppableId];
-      const finish = cards[destination.droppableId];
-      if (start.id === finish.id) {
-        reorderTasksWithinCard(
-          start,
-          source.index,
-          destination.index,
-          draggableId
-        );
-      } else {
-        moveTask(start, finish, source.index, destination.index, draggableId);
-      }
+      moveTask(start, finish, source.index, destination.index, draggableId);
     }
   };
 
