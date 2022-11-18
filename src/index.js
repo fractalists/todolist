@@ -3,6 +3,8 @@ import { useState, useEffect, Fragment } from 'react';
 import { createRoot } from 'react-dom/client';
 import styled from 'styled-components';
 
+// const localTestMode = true
+const localTestMode = false
 
 const ITEM_TYPES = {
   CARD: "card",
@@ -61,8 +63,6 @@ const NewCard = styled.div`
   font-size: 1em;
 `;
 
-// const localTestMode = true
-const localTestMode = false
 var synced = false
 const localStorageKey = "franciszhang-todolist"
 
@@ -369,11 +369,11 @@ const Title = styled.div`
   margin: 5px 0px 0px 5px;
   padding: 8px;
   font-size: 1em;
-  text-overflow: ellipsis;
   color: Brown;
   border: 1px solid transparent;
   borderRadius: 2px;
   white-space: pre;
+  overflow: auto;
 `;
 const Cross = styled.div`
   padding: 8px 12px;
@@ -510,6 +510,7 @@ const TaskContent = styled.div`
   width: 100%;
   font-size: 0.7em;
   white-space: pre;
+  overflow: auto;
 `;
 function Task(props) {
   return (
