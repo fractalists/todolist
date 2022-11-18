@@ -61,7 +61,8 @@ const NewCard = styled.div`
   font-size: 1em;
 `;
 
-const localTestMode = true
+// const localTestMode = true
+const localTestMode = false
 var synced = false
 const localStorageKey = "franciszhang-todolist"
 
@@ -372,6 +373,7 @@ const Title = styled.div`
   color: Brown;
   border: 1px solid transparent;
   borderRadius: 2px;
+  white-space: pre;
 `;
 const Cross = styled.div`
   padding: 8px 12px;
@@ -507,6 +509,7 @@ const TaskContent = styled.div`
   background-color: ${(props) => (props.isDragging ? "AliceBlue" : "white")};
   width: 100%;
   font-size: 0.7em;
+  white-space: pre;
 `;
 function Task(props) {
   return (
@@ -541,7 +544,7 @@ function Task(props) {
   );
 }
 
-const Input = styled.input`
+const Input = styled.textarea`
   font-size: ${(props) => props.fontSize || "inherit"};
   font-family: inherit;
   margin: ${(props) => props.margin || "inherit"};
@@ -560,7 +563,7 @@ function EditInput(props) {
       value={val}
       onChange={(e) => setVal(e.target.value)}
       onKeyPress={(event) => {
-        if (event.key === "Enter" || event.key === "Escape") {
+        if (event.key === "Escape") {
           props.onSave(val);
           event.preventDefault();
           event.stopPropagation();
