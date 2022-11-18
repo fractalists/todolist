@@ -42,7 +42,6 @@ const Container = styled.div`
   @media (max-width: 4096px) {
     flex-flow: row wrap;
   }
-  align-items: center;
   justify-items: center;
   font-family: Helvetica, Arial, sans-serif;
 `;
@@ -63,7 +62,7 @@ const NewCard = styled.div`
   cursor: pointer;
   font-size: 1em;
 `;
-const Undo = styled.div`
+const UndoRedo = styled.div`
   font-size: 1em;
   color: grey;
   text-align: left;
@@ -73,8 +72,11 @@ const Undo = styled.div`
 `;
 
 var synced = false
+var historyIndex = 0
+var historyLength = 1
+const historyMaxLimit = 10
 const localStorageKey = "franciszhang-todolist"
-const historyLimit = 5
+
 
 function testingLog(logContent) {
   if (!localTestMode) {
@@ -87,7 +89,7 @@ function getTodos() {
   if (synced || localTestMode) {
     let historyStr = localStorage.getItem(localStorageKey)
     testingLog("[getTodos] history is: " + historyStr)
-    return JSON.parse(historyStr)[0]
+    return JSON.parse(historyStr)[historyIndex]
   }
 
   const request = new XMLHttpRequest();
@@ -98,27 +100,35 @@ function getTodos() {
     console.log(request.responseText);
     localStorage.setItem(localStorageKey, request.responseText);
     synced = true
-    return JSON.parse(request.responseText)[0]
+    return JSON.parse(request.responseText)[historyIndex]
   }
 }
 
 function undoTodos() {
-  let history = JSON.parse(localStorage.getItem(localStorageKey));
-  testingLog("[undoTodos] current history is: " + JSON.stringify(history));
-  if (history.length <= 1) {
-    testingLog("[undoTodos] length <= 1");
-    return;
+  if (historyIndex >= historyLength - 1) {
+    return false
+  }
+  
+  historyIndex++
+  testingLog("[undoTodos] current historyIndex is: " + historyIndex)
+  return true
+}
+
+function redoTodos() {
+  if (historyIndex <= 0) {
+    return false
   }
 
-  history.shift();
-  localStorage.setItem(localStorageKey, JSON.stringify(history));
-  testingLog("[undoTodos] new history is: " + JSON.stringify(history));
+  historyIndex--
+  testingLog("[redoTodos] current historyIndex is: " + historyIndex)
+  return true
 }
 
 async function updateTodos(newData) {
   let history = JSON.parse(localStorage.getItem(localStorageKey));
+  historyLength = history.length
   testingLog("[updateTodos] current history is: " + JSON.stringify(history))
-  let currentData = JSON.parse(JSON.stringify(history[0]));
+  let currentData = JSON.parse(JSON.stringify(history[historyIndex]));
   let currentVersion = currentData.version;
   delete currentData['version'];
   
@@ -130,10 +140,16 @@ async function updateTodos(newData) {
   }
 
   newData.version = currentVersion + 1;
-  while (history.length >= historyLimit) {
+  while (historyIndex > 0) {
+    history.shift()
+    historyIndex--
+  }
+
+  while (history.length >= historyMaxLimit) {
     history.splice(-1)
   }
   history.unshift(newData)
+  historyLength = history.length
   testingLog("[updateTodos] new history is: " + JSON.stringify(history));
 
   let newHistoryStr = JSON.stringify(history)
@@ -170,7 +186,7 @@ async function updateTodos(newData) {
 function App() {
   // localStorage.setItem(localStorageKey, JSON.stringify(DATASET));
 
-  const [dataset, setDataset] = useState(() => {
+  const [dataset, ] = useState(() => {
     const initialValue = getTodos();
     return initialValue || DATASET[0];
   });
@@ -203,12 +219,23 @@ function App() {
   };
 
   const onUndo = () => {
-    undoTodos()
-    let currentDataset = getTodos()
-    testingLog("[onUndo] current dataset is: " + JSON.stringify(currentDataset));
-    setTasks(currentDataset.tasks)
-    setCards(currentDataset.cards)
-    setCardOrder(currentDataset.cardOrder)
+    if (undoTodos()) {
+      let currentDataset = getTodos()
+      testingLog("[onUndo] current dataset is: " + JSON.stringify(currentDataset));
+      setTasks(currentDataset.tasks)
+      setCards(currentDataset.cards)
+      setCardOrder(currentDataset.cardOrder)
+    }
+  }
+
+  const onRedo = () => {
+    if (redoTodos()) {
+      let currentDataset = getTodos()
+      testingLog("[onRedo] current dataset is: " + JSON.stringify(currentDataset));
+      setTasks(currentDataset.tasks)
+      setCards(currentDataset.cards)
+      setCardOrder(currentDataset.cardOrder)
+    }
   }
 
   return (
@@ -223,7 +250,8 @@ function App() {
       />
       <Menu>
         <NewCard onClick={onAddNewCard}>+ New Card</NewCard>
-        <Undo onClick={onUndo}>- Undo</Undo>
+        <UndoRedo onClick={onUndo}>← Undo</UndoRedo>
+        <UndoRedo onClick={onRedo}>→ Redo</UndoRedo>
       </Menu>
     </Container>
   );
