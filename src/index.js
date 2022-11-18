@@ -46,9 +46,8 @@ const Container = styled.div`
   font-family: Helvetica, Arial, sans-serif;
 `;
 const Menu = styled.div`
-  margin: 2em;
   display: flex;
-  flex-flow: column wrap;
+  flex-flow: row wrap;
 `;
 // const Note = styled.div`
 //   font-size: 0.8em;
@@ -58,7 +57,7 @@ const NewCard = styled.div`
   font-size: 1em;
   color: grey;
   text-align: left;
-  margin: 1em;
+  margin: 0.2em 1em 0.5em 0.5em;
   cursor: pointer;
   font-size: 1em;
 `;
@@ -66,7 +65,7 @@ const UndoRedo = styled.div`
   font-size: 1em;
   color: grey;
   text-align: left;
-  margin: 1em;
+  margin: 0.2em 1em 0.5em 0.5em;
   cursor: pointer;
   font-size: 1em;
 `;
@@ -240,6 +239,11 @@ function App() {
 
   return (
     <Container>
+      <Menu>
+        <NewCard onClick={onAddNewCard}>➕NewCard</NewCard>
+        <UndoRedo onClick={onUndo}>⬅️Undo</UndoRedo>
+        <UndoRedo onClick={onRedo}>➡️Redo</UndoRedo>
+      </Menu>
       <DragDropCards
         cards={cards}
         tasks={tasks}
@@ -248,11 +252,6 @@ function App() {
         setTasks={setTasks}
         setCardOrder={setCardOrder}
       />
-      <Menu>
-        <NewCard onClick={onAddNewCard}>+ New Card</NewCard>
-        <UndoRedo onClick={onUndo}>← Undo</UndoRedo>
-        <UndoRedo onClick={onRedo}>→ Redo</UndoRedo>
-      </Menu>
     </Container>
   );
 }
