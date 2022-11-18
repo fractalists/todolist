@@ -1,7 +1,7 @@
-import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
-import { useState, useEffect, Fragment } from 'react';
-import { createRoot } from 'react-dom/client';
-import styled from 'styled-components';
+import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd'
+import { useState, useEffect, Fragment } from 'react'
+import { createRoot } from 'react-dom/client'
+import styled from 'styled-components'
 
 // const localTestMode = true
 const localTestMode = false
@@ -9,7 +9,7 @@ const localTestMode = false
 const ITEM_TYPES = {
   CARD: "card",
   TASK: "task"
-};
+}
 
 const DATASET = { history: [{
     tasks: {
@@ -38,7 +38,6 @@ const DATASET = { history: [{
   }],
   historyIndex: 0
 }
-;
 
 const Container = styled.div`
   display: flex;
@@ -47,15 +46,15 @@ const Container = styled.div`
   }
   justify-items: center;
   font-family: Helvetica, Arial, sans-serif;
-`;
+`
 const Menu = styled.div`
   display: flex;
   flex-flow: row wrap;
-`;
+`
 // const Note = styled.div`
 //   font-size: 0.8em;
 //   margin: 20px 0;
-// `;
+// `
 const NewCard = styled.div`
   font-size: 1em;
   color: grey;
@@ -63,7 +62,7 @@ const NewCard = styled.div`
   margin: 0.2em 1em 0.5em 0.5em;
   cursor: pointer;
   font-size: 1em;
-`;
+`
 const UndoRedo = styled.div`
   font-size: 1em;
   color: grey;
@@ -71,7 +70,7 @@ const UndoRedo = styled.div`
   margin: 0.2em 1em 0.5em 0.5em;
   cursor: pointer;
   font-size: 1em;
-`;
+`
 
 var synced = false
 const historyMaxLimit = 10
@@ -94,13 +93,13 @@ function getTodos() {
     return dataset.history[dataset.historyIndex]
   }
 
-  const request = new XMLHttpRequest();
-  request.open('GET', 'https://todo.franciszhang.org/data', false);  // `false` makes the request synchronous
-  request.send(null);
+  const request = new XMLHttpRequest()
+  request.open('GET', 'https://todo.franciszhang.org/data', false)  // `false` makes the request synchronous
+  request.send(null)
 
   if (request.status === 200) {
-    console.log(request.responseText);
-    localStorage.setItem(localStorageKey, request.responseText);
+    console.log(request.responseText)
+    localStorage.setItem(localStorageKey, request.responseText)
     synced = true
 
     let dataset = JSON.parse(request.responseText)
@@ -109,7 +108,7 @@ function getTodos() {
 }
 
 function undoTodos() {
-  let dataset = JSON.parse(localStorage.getItem(localStorageKey));
+  let dataset = JSON.parse(localStorage.getItem(localStorageKey))
   if (dataset.historyIndex >= dataset.history.length - 1) {
     return false
   }
@@ -117,13 +116,13 @@ function undoTodos() {
   dataset.historyIndex++
   testingLog("[undoTodos] current historyIndex is: " + dataset.historyIndex)
   let datasetStr = JSON.stringify(dataset)
-  localStorage.setItem(localStorageKey, datasetStr);
-  saveTodos(datasetStr);
+  localStorage.setItem(localStorageKey, datasetStr)
+  saveTodos(datasetStr)
   return true
 }
 
 function redoTodos() {
-  let dataset = JSON.parse(localStorage.getItem(localStorageKey));
+  let dataset = JSON.parse(localStorage.getItem(localStorageKey))
   if (dataset.historyIndex <= 0) {
     return false
   }
@@ -131,26 +130,26 @@ function redoTodos() {
   dataset.historyIndex--
   testingLog("[redoTodos] current historyIndex is: " + dataset.historyIndex)
   let datasetStr = JSON.stringify(dataset)
-  localStorage.setItem(localStorageKey, datasetStr);
-  saveTodos(datasetStr);
+  localStorage.setItem(localStorageKey, datasetStr)
+  saveTodos(datasetStr)
   return true
 }
 
 async function updateTodos(newData) {
-  let dataset = JSON.parse(localStorage.getItem(localStorageKey));
+  let dataset = JSON.parse(localStorage.getItem(localStorageKey))
   testingLog("[updateTodos] current dataset is: " + JSON.stringify(dataset))
-  let currentData = JSON.parse(JSON.stringify(dataset.history[dataset.historyIndex]));
-  let currentVersion = currentData.version;
-  delete currentData['version'];
+  let currentData = JSON.parse(JSON.stringify(dataset.history[dataset.historyIndex]))
+  let currentVersion = currentData.version
+  delete currentData['version']
   
-  testingLog("[updateTodos] current version is: " + currentVersion);
+  testingLog("[updateTodos] current version is: " + currentVersion)
 
   if (JSON.stringify(currentData) === JSON.stringify(newData)) {
-    testingLog("[updateTodos] no change was made");
+    testingLog("[updateTodos] no change was made")
     return
   }
 
-  newData.version = currentVersion + 1;
+  newData.version = currentVersion + 1
   while (dataset.historyIndex > 0) {
     dataset.history.shift()
     dataset.historyIndex--
@@ -160,14 +159,14 @@ async function updateTodos(newData) {
     dataset.history.splice(-1)
   }
   dataset.history.unshift(newData)
-  testingLog("[updateTodos] new dataset is: " + JSON.stringify(dataset));
+  testingLog("[updateTodos] new dataset is: " + JSON.stringify(dataset))
   saveTodos(JSON.stringify(dataset))
 }
 
 async function saveTodos(datasetStr) {
   if (localTestMode) {
-    localStorage.setItem(localStorageKey, datasetStr);
-    return;
+    localStorage.setItem(localStorageKey, datasetStr)
+    return
   }
 
   const requestOptions = {
@@ -176,34 +175,34 @@ async function saveTodos(datasetStr) {
       'Content-Type': 'text/plain'
     },
     body: datasetStr
-  };
+  }
 
   try {
-    const response = await fetch('https://todo.franciszhang.org/data', requestOptions);
+    const response = await fetch('https://todo.franciszhang.org/data', requestOptions)
     const status = response.status
     console.log("saveValue status is: " + status)
     if (status === 200) {
-      localStorage.setItem(localStorageKey, datasetStr);
+      localStorage.setItem(localStorageKey, datasetStr)
     } else {
-      alert("failed to save changes");
+      alert("failed to save changes")
     }
 
   } catch (err) {
-    alert("network error: " + err.toString());
+    alert("network error: " + err.toString())
   }
 }
 
 
 function App() {
-  // localStorage.setItem(localStorageKey, JSON.stringify(DATASET));
+  // localStorage.setItem(localStorageKey, JSON.stringify(DATASET))
 
   const [dataset, ] = useState(() => {
-    const initialValue = getTodos();
-    return initialValue || DATASET[0];
-  });
+    const initialValue = getTodos()
+    return initialValue || DATASET[0]
+  })
 
-  const [tasks, setTasks] = useState(dataset.tasks);
-  const [cards, setCards] = useState(dataset.cards);
+  const [tasks, setTasks] = useState(dataset.tasks)
+  const [cards, setCards] = useState(dataset.cards)
   const [cardOrder, setCardOrder] = useState(dataset.cardOrder)
 
   useEffect(() => {
@@ -211,28 +210,28 @@ function App() {
       tasks,
       cards,
       cardOrder
-    });
-  }, [tasks, cards, cardOrder]);
+    })
+  }, [tasks, cards, cardOrder])
 
   const onAddNewCard = () => {
     const newCard = {
       id: "card-" + genRandomID(),
       title: "New Task List",
       taskIds: []
-    };
-    const newCardOrder = Array.from(cardOrder);
-    newCardOrder.push(newCard.id);
+    }
+    const newCardOrder = Array.from(cardOrder)
+    newCardOrder.push(newCard.id)
     setCards({
       ...cards,
       [newCard.id]: newCard
-    });
-    setCardOrder(newCardOrder);
-  };
+    })
+    setCardOrder(newCardOrder)
+  }
 
   const onUndo = () => {
     if (undoTodos()) {
       let currentDataset = getTodos()
-      testingLog("[onUndo] current dataset is: " + JSON.stringify(currentDataset));
+      testingLog("[onUndo] current dataset is: " + JSON.stringify(currentDataset))
       setTasks(currentDataset.tasks)
       setCards(currentDataset.cards)
       setCardOrder(currentDataset.cardOrder)
@@ -242,7 +241,7 @@ function App() {
   const onRedo = () => {
     if (redoTodos()) {
       let currentDataset = getTodos()
-      testingLog("[onRedo] current dataset is: " + JSON.stringify(currentDataset));
+      testingLog("[onRedo] current dataset is: " + JSON.stringify(currentDataset))
       setTasks(currentDataset.tasks)
       setCards(currentDataset.cards)
       setCardOrder(currentDataset.cardOrder)
@@ -265,7 +264,7 @@ function App() {
         setCardOrder={setCardOrder}
       />
     </Container>
-  );
+  )
 }
 
 const CardsContainer = styled.div`
@@ -273,7 +272,7 @@ const CardsContainer = styled.div`
   @media (max-width: 4096px) {
     flex-flow: row wrap;
   }
-`;
+`
 function DragDropCards({
   cards,
   tasks,
@@ -282,53 +281,53 @@ function DragDropCards({
   setTasks,
   setCardOrder
 }) {
-  const [editing, setEditing] = useState(null);
+  const [editing, setEditing] = useState(null)
 
   const onDragEnd = (result) => {
-    const { destination, source, draggableId, type } = result;
+    const { destination, source, draggableId, type } = result
 
     if (type === ITEM_TYPES.CARD) {
       if (!destination || 
         (destination.droppableId === source.droppableId &&
         destination.index === source.index)) {
-        return;
+        return
       }
-      reorderCards(source, destination, draggableId);
-      return;
+      reorderCards(source, destination, draggableId)
+      return
     }
 
     // type === tasks
     if (!destination) {
-      let card = cards[source.droppableId];
+      let card = cards[source.droppableId]
       onRemoveTask(Array.from(card.taskIds)[source.index], card.id)
-      return;
+      return
     }
 
     if (destination.droppableId === source.droppableId &&
         destination.index === source.index) {
-      return;
+      return
     }
 
-    const start = cards[source.droppableId];
-    const finish = cards[destination.droppableId];
+    const start = cards[source.droppableId]
+    const finish = cards[destination.droppableId]
     if (start.id === finish.id) {
       reorderTasksWithinCard(
         start,
         source.index,
         destination.index,
         draggableId
-      );
+      )
     } else {
-      moveTask(start, finish, source.index, destination.index, draggableId);
+      moveTask(start, finish, source.index, destination.index, draggableId)
     }
-  };
+  }
 
   const reorderCards = (source, destination, draggableId) => {
-    const newCardOrder = Array.from(cardOrder);
-    newCardOrder.splice(source.index, 1);
-    newCardOrder.splice(destination.index, 0, draggableId);
-    setCardOrder(newCardOrder);
-  };
+    const newCardOrder = Array.from(cardOrder)
+    newCardOrder.splice(source.index, 1)
+    newCardOrder.splice(destination.index, 0, draggableId)
+    setCardOrder(newCardOrder)
+  }
 
   const reorderTasksWithinCard = (
     card,
@@ -336,69 +335,69 @@ function DragDropCards({
     destinationIdx,
     draggableId
   ) => {
-    const newTaskIds = Array.from(card.taskIds);
-    newTaskIds.splice(sourceIdx, 1);
-    newTaskIds.splice(destinationIdx, 0, draggableId);
+    const newTaskIds = Array.from(card.taskIds)
+    newTaskIds.splice(sourceIdx, 1)
+    newTaskIds.splice(destinationIdx, 0, draggableId)
     setCards({
       ...cards,
       [card.id]: {
         ...card,
         taskIds: newTaskIds
       }
-    });
-  };
+    })
+  }
 
   const moveTask = (start, finish, sourceIdx, destinationIdx, draggableId) => {
-    const startTaskIds = Array.from(start.taskIds);
-    startTaskIds.splice(sourceIdx, 1);
+    const startTaskIds = Array.from(start.taskIds)
+    startTaskIds.splice(sourceIdx, 1)
     const newStart = {
       ...start,
       taskIds: startTaskIds
-    };
-    const finishTaskIds = Array.from(finish.taskIds);
-    finishTaskIds.splice(destinationIdx, 0, draggableId);
+    }
+    const finishTaskIds = Array.from(finish.taskIds)
+    finishTaskIds.splice(destinationIdx, 0, draggableId)
     const newFinish = {
       ...finish,
       taskIds: finishTaskIds
-    };
+    }
     setCards({
       ...cards,
       [newStart.id]: newStart,
       [newFinish.id]: newFinish
-    });
-  };
+    })
+  }
 
   const onAddNewTask = (cardID, content) => {
     const newTask = {
       id: "task-" + genRandomID(),
       content
-    };
+    }
     setTasks({
       ...tasks,
       [newTask.id]: newTask
-    });
-    const newTaskIds = Array.from(cards[cardID].taskIds);
-    newTaskIds.push(newTask.id);
-    setCards({ ...cards, [cardID]: { ...cards[cardID], taskIds: newTaskIds } });
-  };
+    })
+    const newTaskIds = Array.from(cards[cardID].taskIds)
+    newTaskIds.push(newTask.id)
+    setCards({ ...cards, [cardID]: { ...cards[cardID], taskIds: newTaskIds } })
+  }
 
   const onRemoveCard = (cardID) => {
-    const newCardOrder = cardOrder.filter((id) => id !== cardID);
-    setCardOrder(newCardOrder);
+    const newCardOrder = cardOrder.filter((id) => id !== cardID)
+    setCardOrder(newCardOrder)
 
-    const cardTaskIds = cards[cardID].taskIds;
-    cardTaskIds.forEach((taskID) => delete tasks[taskID]);
-    delete cards[cardID];
-    setCards(cards);
-    setTasks(tasks);
-  };
+    const cardTaskIds = cards[cardID].taskIds
+    cardTaskIds.forEach((taskID) => delete tasks[taskID])
+    delete cards[cardID]
+    setCards(cards)
+    setTasks(tasks)
+  }
 
   const onRemoveTask = (taskID, cardID) => {
-    const newTaskIds = cards[cardID].taskIds.filter((id) => id !== taskID);
-    setCards({ ...cards, [cardID]: { ...cards[cardID], taskIds: newTaskIds } });
-    delete tasks[taskID];
-    setTasks(tasks);
-  };
+    const newTaskIds = cards[cardID].taskIds.filter((id) => id !== taskID)
+    setCards({ ...cards, [cardID]: { ...cards[cardID], taskIds: newTaskIds } })
+    delete tasks[taskID]
+    setTasks(tasks)
+  }
 
   const onSaveTitleEdit = (cardID, newTitle) => {
     if (newTitle !== cards[cardID].title) {
@@ -408,22 +407,22 @@ function DragDropCards({
           ...cards[cardID],
           title: newTitle
         }
-      });
+      })
     }
-    setEditing(null);
-  };
+    setEditing(null)
+  }
 
   const onSaveTaskEdit = (taskID, cardID, newContent) => {
     if (newContent.trim() === "") {
-      onRemoveTask(taskID, cardID);
+      onRemoveTask(taskID, cardID)
     } else if (newContent !== tasks[taskID].content) {
       setTasks({
         ...tasks,
         [taskID]: { ...tasks[taskID], content: newContent }
-      });
+      })
     }
-    setEditing(null);
-  };
+    setEditing(null)
+  }
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
@@ -431,8 +430,8 @@ function DragDropCards({
         {(provided) => (
           <CardsContainer {...provided.droppableProps} ref={provided.innerRef}>
             {cardOrder.map((id, index) => {
-              const card = cards[id];
-              const cardTasks = card.taskIds.map((taskId) => tasks[taskId]);
+              const card = cards[id]
+              const cardTasks = card.taskIds.map((taskId) => tasks[taskId])
               return (
                 <Card
                   key={card.id}
@@ -450,20 +449,20 @@ function DragDropCards({
                   isTitleEditing={editing === card.id}
                   isTaskEditing={(task) => editing === task.id}
                 />
-              );
+              )
             })}
             {provided.placeholder}
           </CardsContainer>
         )}
       </Droppable>
     </DragDropContext>
-  );
+  )
 }
 
 const TitleBar = styled.div`
   display: flex;
   justify-content: space-between;
-`;
+`
 const Title = styled.div`
   margin: 5px 0px 0px 5px;
   padding: 8px;
@@ -473,13 +472,13 @@ const Title = styled.div`
   borderRadius: 2px;
   white-space: pre;
   overflow: auto;
-`;
+`
 const Cross = styled.div`
   padding: 8px 12px;
   cursor: pointer;
   text-align: right;
   color: grey;
-`;
+`
 const CardContainer = styled.div`
   margin: 5px;
   border: 1px solid Gainsboro;
@@ -488,17 +487,17 @@ const CardContainer = styled.div`
   display: flex;
   flex-direction: column;
   background-color: white;
-`;
+`
 const TaskList = styled.div`
   padding: 8px;
   background-color: ${(props) =>
     props.isDraggingOver ? "WhiteSmoke" : "inherit"};
   min-height: 100px;
   height: 100%;
-`;
+`
 const NewTaskBar = styled.div`
   display: flex;
-`;
+`
 const NewTaskButton = styled.div`
   padding: 8px;
   margin: 3px;
@@ -506,16 +505,16 @@ const NewTaskButton = styled.div`
   text-align: right;
   color: grey;
   font-size: 0.7em;
-`;
+`
 
 function Card(props) {
-  const [isAddingNewTask, setIsAddingNewTask] = useState(false);
+  const [isAddingNewTask, setIsAddingNewTask] = useState(false)
   const onSaveTask = (content) => {
     if (content.trim() !== "") {
-      props.onAddNewTask(content);
+      props.onAddNewTask(content)
     }
-    setIsAddingNewTask(false);
-  };
+    setIsAddingNewTask(false)
+  }
 
   return (
     <Draggable draggableId={props.card.id} index={props.index}>
@@ -594,12 +593,12 @@ function Card(props) {
         </CardContainer>
       )}
     </Draggable>
-  );
+  )
 }
 
 const TaskContainer = styled.div`
   display: flex;
-`;
+`
 const TaskContent = styled.div`
   border: 1px solid Gainsboro;
   padding: 8px;
@@ -610,7 +609,7 @@ const TaskContent = styled.div`
   font-size: 0.7em;
   white-space: pre;
   overflow: auto;
-`;
+`
 function Task(props) {
   return (
     <TaskContainer>
@@ -641,7 +640,7 @@ function Task(props) {
         </Draggable>
       )}
     </TaskContainer>
-  );
+  )
 }
 
 const Input = styled.textarea`
@@ -653,9 +652,9 @@ const Input = styled.textarea`
   color: ${(props) => props.color || "inherit"};
   border: ${(props) => props.border || "inherit"};
   borderRadius: ${(props) => props.borderRadius || "inherit"};
-`;
+`
 function EditInput(props) {
-  const [val, setVal] = useState(props.value);
+  const [val, setVal] = useState(props.value)
   return (
     <Input
       type="text"
@@ -664,9 +663,9 @@ function EditInput(props) {
       onChange={(e) => setVal(e.target.value)}
       onKeyPress={(event) => {
         if (event.key === "Escape") {
-          props.onSave(val);
-          event.preventDefault();
-          event.stopPropagation();
+          props.onSave(val)
+          event.preventDefault()
+          event.stopPropagation()
         }
       }}
       onBlur={() => props.onSave(val)}
@@ -677,13 +676,13 @@ function EditInput(props) {
       border={props.border}
       borderRadius={props.borderRadius}
     />
-  );
+  )
 }
 
-const container = document.getElementById('root');
-const root = createRoot(container);
-root.render(<App />);
+const container = document.getElementById('root')
+const root = createRoot(container)
+root.render(<App />)
 
 function genRandomID() {
-  return (Math.random() + 1).toString(36).substring(7);
+  return (Math.random() + 1).toString(36).substring(7)
 }
