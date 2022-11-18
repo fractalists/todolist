@@ -11,7 +11,7 @@ const ITEM_TYPES = {
   TASK: "task"
 };
 
-const DATASET = {
+const DATASET = [{
   tasks: {
     "task-1": { id: "task-1", content: "water plants" },
     "task-2": { id: "task-2", content: "buy oat milk" },
@@ -35,7 +35,7 @@ const DATASET = {
   },
   cardOrder: ["card-1", "card-2", "card-3", "card-4"],
   version: 0
-};
+}];
 
 const Container = styled.div`
   display: flex;
@@ -49,7 +49,7 @@ const Container = styled.div`
 const Menu = styled.div`
   margin: 2em;
   display: flex;
-  flex-flow: row wrap;
+  flex-flow: column wrap;
 `;
 // const Note = styled.div`
 //   font-size: 0.8em;
@@ -59,16 +59,35 @@ const NewCard = styled.div`
   font-size: 1em;
   color: grey;
   text-align: left;
+  margin: 1em;
+  cursor: pointer;
+  font-size: 1em;
+`;
+const Undo = styled.div`
+  font-size: 1em;
+  color: grey;
+  text-align: left;
+  margin: 1em;
   cursor: pointer;
   font-size: 1em;
 `;
 
 var synced = false
 const localStorageKey = "franciszhang-todolist"
+const historyLimit = 5
+
+function testingLog(logContent) {
+  if (!localTestMode) {
+    return
+  }
+  console.log(logContent.toString())
+}
 
 function getTodos() {
   if (synced || localTestMode) {
-    return localStorage.getItem(localStorageKey);
+    let historyStr = localStorage.getItem(localStorageKey)
+    testingLog("[getTodos] history is: " + historyStr)
+    return JSON.parse(historyStr)[0]
   }
 
   const request = new XMLHttpRequest();
@@ -79,31 +98,57 @@ function getTodos() {
     console.log(request.responseText);
     localStorage.setItem(localStorageKey, request.responseText);
     synced = true
-    return request.responseText
+    return JSON.parse(request.responseText)[0]
   }
 }
 
+function undoTodos() {
+  let history = JSON.parse(localStorage.getItem(localStorageKey));
+  testingLog("[undoTodos] current history is: " + JSON.stringify(history));
+  if (history.length <= 1) {
+    testingLog("[undoTodos] length <= 1");
+    return;
+  }
+
+  history.shift();
+  localStorage.setItem(localStorageKey, JSON.stringify(history));
+  testingLog("[undoTodos] new history is: " + JSON.stringify(history));
+}
+
 async function updateTodos(newData) {
-  let currentDataStr = localStorage.getItem(localStorageKey);
-  let currentData = JSON.parse(currentDataStr);
+  let history = JSON.parse(localStorage.getItem(localStorageKey));
+  testingLog("[updateTodos] current history is: " + JSON.stringify(history))
+  let currentData = JSON.parse(JSON.stringify(history[0]));
   let currentVersion = currentData.version;
   delete currentData['version'];
   
-  console.log("current version is: " + currentVersion);
+  testingLog("[updateTodos] current version is: " + currentVersion);
 
   if (JSON.stringify(currentData) === JSON.stringify(newData)) {
+    testingLog("[updateTodos] no change was made");
     return
   }
 
   newData.version = currentVersion + 1;
-  let newDataStr = JSON.stringify(newData)
+  while (history.length >= historyLimit) {
+    history.splice(-1)
+  }
+  history.unshift(newData)
+  testingLog("[updateTodos] new history is: " + JSON.stringify(history));
+
+  let newHistoryStr = JSON.stringify(history)
+
+  if (localTestMode) {
+    localStorage.setItem(localStorageKey, newHistoryStr);
+    return;
+  }
 
   const requestOptions = {
     method: 'PUT',
     headers: {
       'Content-Type': 'text/plain'
     },
-    body: newDataStr
+    body: newHistoryStr
   };
 
   try {
@@ -111,27 +156,23 @@ async function updateTodos(newData) {
     const status = response.status
     console.log("saveValue status is: " + status)
     if (status === 200) {
-      localStorage.setItem(localStorageKey, newDataStr);
+      localStorage.setItem(localStorageKey, newHistoryStr);
     } else {
       alert("failed to save changes");
     }
 
   } catch (err) {
     alert("network error: " + err.toString());
-
-  } finally {
-    if (localTestMode) {
-      localStorage.setItem(localStorageKey, newDataStr);
-    }
   }
 }
 
 
 function App() {
-  const [dataset, ] = useState(() => {
-    const savedDataset = getTodos();
-    const initialValue = JSON.parse(savedDataset);
-    return initialValue || DATASET;
+  // localStorage.setItem(localStorageKey, JSON.stringify(DATASET));
+
+  const [dataset, setDataset] = useState(() => {
+    const initialValue = getTodos();
+    return initialValue || DATASET[0];
   });
 
   const [tasks, setTasks] = useState(dataset.tasks);
@@ -161,6 +202,15 @@ function App() {
     setCardOrder(newCardOrder);
   };
 
+  const onUndo = () => {
+    undoTodos()
+    let currentDataset = getTodos()
+    testingLog("[onUndo] current dataset is: " + JSON.stringify(currentDataset));
+    setTasks(currentDataset.tasks)
+    setCards(currentDataset.cards)
+    setCardOrder(currentDataset.cardOrder)
+  }
+
   return (
     <Container>
       <DragDropCards
@@ -173,6 +223,7 @@ function App() {
       />
       <Menu>
         <NewCard onClick={onAddNewCard}>+ New Card</NewCard>
+        <Undo onClick={onUndo}>- Undo</Undo>
       </Menu>
     </Container>
   );
@@ -206,7 +257,7 @@ function DragDropCards({
       reorderCards(source, destination, draggableId);
       return;
     }
-    
+
     // type === tasks
     if (!destination) {
       let card = cards[source.droppableId];
