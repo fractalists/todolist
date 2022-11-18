@@ -11,31 +11,34 @@ const ITEM_TYPES = {
   TASK: "task"
 };
 
-const DATASET = [{
-  tasks: {
-    "task-1": { id: "task-1", content: "water plants" },
-    "task-2": { id: "task-2", content: "buy oat milk" },
-    "task-3": { id: "task-3", content: "build a trello board" },
-    "task-4": { id: "task-4", content: "have a beach day" },
-    "task-5": { id: "task-5", content: "build tic tac toe" }
-  },
-  cards: {
-    "card-1": {
-      id: "card-1",
-      title: "Home Todos",
-      taskIds: ["task-1", "task-2"]
+const DATASET = { history: [{
+    tasks: {
+      "task-1": { id: "task-1", content: "water plants" },
+      "task-2": { id: "task-2", content: "buy oat milk" },
+      "task-3": { id: "task-3", content: "build a trello board" },
+      "task-4": { id: "task-4", content: "have a beach day" },
+      "task-5": { id: "task-5", content: "build tic tac toe" }
     },
-    "card-2": {
-      id: "card-2",
-      title: "Work Todos",
-      taskIds: ["task-3"]
+    cards: {
+      "card-1": {
+        id: "card-1",
+        title: "Home Todos",
+        taskIds: ["task-1", "task-2"]
+      },
+      "card-2": {
+        id: "card-2",
+        title: "Work Todos",
+        taskIds: ["task-3"]
+      },
+      "card-3": { id: "card-3", title: "Fun Todos", taskIds: ["task-4"] },
+      "card-4": { id: "card-4", title: "Completed", taskIds: ["task-5"] }
     },
-    "card-3": { id: "card-3", title: "Fun Todos", taskIds: ["task-4"] },
-    "card-4": { id: "card-4", title: "Completed", taskIds: ["task-5"] }
-  },
-  cardOrder: ["card-1", "card-2", "card-3", "card-4"],
-  version: 0
-}];
+    cardOrder: ["card-1", "card-2", "card-3", "card-4"],
+    version: 0
+  }],
+  historyIndex: 0
+}
+;
 
 const Container = styled.div`
   display: flex;
@@ -71,8 +74,6 @@ const UndoRedo = styled.div`
 `;
 
 var synced = false
-var historyIndex = 0
-var historyLength = 1
 const historyMaxLimit = 10
 const localStorageKey = "franciszhang-todolist"
 
@@ -86,9 +87,11 @@ function testingLog(logContent) {
 
 function getTodos() {
   if (synced || localTestMode) {
-    let historyStr = localStorage.getItem(localStorageKey)
-    testingLog("[getTodos] history is: " + historyStr)
-    return JSON.parse(historyStr)[historyIndex]
+    let datasetStr = localStorage.getItem(localStorageKey)
+    testingLog("[getTodos] datasetStr is: " + datasetStr)
+
+    let dataset = JSON.parse(datasetStr)
+    return dataset.history[dataset.historyIndex]
   }
 
   const request = new XMLHttpRequest();
@@ -99,35 +102,40 @@ function getTodos() {
     console.log(request.responseText);
     localStorage.setItem(localStorageKey, request.responseText);
     synced = true
-    return JSON.parse(request.responseText)[historyIndex]
+
+    let dataset = JSON.parse(request.responseText)
+    return dataset.history[dataset.historyIndex]
   }
 }
 
 function undoTodos() {
-  if (historyIndex >= historyLength - 1) {
+  let dataset = JSON.parse(localStorage.getItem(localStorageKey));
+  if (dataset.historyIndex >= dataset.history.length - 1) {
     return false
   }
   
-  historyIndex++
-  testingLog("[undoTodos] current historyIndex is: " + historyIndex)
+  dataset.historyIndex++
+  testingLog("[undoTodos] current historyIndex is: " + dataset.historyIndex)
+  saveTodos(JSON.stringify(dataset));
   return true
 }
 
 function redoTodos() {
-  if (historyIndex <= 0) {
+  let dataset = JSON.parse(localStorage.getItem(localStorageKey));
+  if (dataset.historyIndex <= 0) {
     return false
   }
 
-  historyIndex--
-  testingLog("[redoTodos] current historyIndex is: " + historyIndex)
+  dataset.historyIndex--
+  testingLog("[redoTodos] current historyIndex is: " + dataset.historyIndex)
+  saveTodos(JSON.stringify(dataset));
   return true
 }
 
 async function updateTodos(newData) {
-  let history = JSON.parse(localStorage.getItem(localStorageKey));
-  historyLength = history.length
-  testingLog("[updateTodos] current history is: " + JSON.stringify(history))
-  let currentData = JSON.parse(JSON.stringify(history[historyIndex]));
+  let dataset = JSON.parse(localStorage.getItem(localStorageKey));
+  testingLog("[updateTodos] current dataset is: " + JSON.stringify(dataset))
+  let currentData = JSON.parse(JSON.stringify(dataset.history[dataset.historyIndex]));
   let currentVersion = currentData.version;
   delete currentData['version'];
   
@@ -139,22 +147,22 @@ async function updateTodos(newData) {
   }
 
   newData.version = currentVersion + 1;
-  while (historyIndex > 0) {
-    history.shift()
-    historyIndex--
+  while (dataset.historyIndex > 0) {
+    dataset.history.shift()
+    dataset.historyIndex--
   }
 
-  while (history.length >= historyMaxLimit) {
-    history.splice(-1)
+  while (dataset.history.length >= historyMaxLimit) {
+    dataset.history.splice(-1)
   }
-  history.unshift(newData)
-  historyLength = history.length
-  testingLog("[updateTodos] new history is: " + JSON.stringify(history));
+  dataset.history.unshift(newData)
+  testingLog("[updateTodos] new dataset is: " + JSON.stringify(dataset));
+  saveTodos(JSON.stringify(dataset))
+}
 
-  let newHistoryStr = JSON.stringify(history)
-
+async function saveTodos(datasetStr) {
   if (localTestMode) {
-    localStorage.setItem(localStorageKey, newHistoryStr);
+    localStorage.setItem(localStorageKey, datasetStr);
     return;
   }
 
@@ -163,7 +171,7 @@ async function updateTodos(newData) {
     headers: {
       'Content-Type': 'text/plain'
     },
-    body: newHistoryStr
+    body: datasetStr
   };
 
   try {
@@ -171,7 +179,7 @@ async function updateTodos(newData) {
     const status = response.status
     console.log("saveValue status is: " + status)
     if (status === 200) {
-      localStorage.setItem(localStorageKey, newHistoryStr);
+      localStorage.setItem(localStorageKey, datasetStr);
     } else {
       alert("failed to save changes");
     }
