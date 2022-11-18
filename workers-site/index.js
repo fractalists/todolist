@@ -29,10 +29,28 @@ async function updateTodos(request) {
     }
 
     await todolist.put('todolist', newData)
+    updateTodolistBackup(newData)
     return new Response(newData, { status: 200 })
 
   } catch (err) {
     return new Response(err, { status: 500 })
+  }
+}
+
+function updateTodolistBackup(newData) {
+  var date = new Date();
+  var month = zeroFill(date.getMonth() + 1);
+  var day = zeroFill(date.getDate());
+  var hour = zeroFill(date.getHours());
+  var curTime = date.getFullYear() + "-" + month + "-" + day + "_" + hour;
+  todolist_backup.put(curTime, newData)
+}
+
+function zeroFill(i){
+  if (i >= 0 && i <= 9) {
+      return "0" + i;
+  } else {
+      return i;
   }
 }
 

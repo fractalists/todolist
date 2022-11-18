@@ -3,7 +3,8 @@ name = "todolist"
 workers_dev = true
 compatibility_date = "2022-11-14"
 kv_namespaces = [
-  { binding = "todolist", id = "7c9848410fb44e63b4b4db1f3b51a4ec" }
+  { binding = "todolist", id = "7c9848410fb44e63b4b4db1f3b51a4ec" },
+  { binding = "todolist_backup", id = "891537edec5c4cc4be434c51b6da7f2d" }
 ]
 
 [site]
