@@ -73,7 +73,7 @@ const UndoRedo = styled.div`
 `
 
 var synced = false
-const historyMaxLimit = 10
+const historyMaxLimit = 4
 const localStorageKey = "franciszhang-todolist"
 
 
