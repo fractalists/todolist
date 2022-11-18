@@ -61,11 +61,12 @@ const NewCard = styled.div`
   font-size: 1em;
 `;
 
+const localTestMode = true
 var synced = false
 const localStorageKey = "franciszhang-todolist"
 
 function getTodos() {
-  if (synced) {
+  if (synced || localTestMode) {
     return localStorage.getItem(localStorageKey);
   }
 
@@ -108,15 +109,20 @@ async function updateTodos(newData) {
     const response = await fetch('https://todo.franciszhang.org/data', requestOptions);
     const status = response.status
     console.log("saveValue status is: " + status)
-    if (status !== 200) {
-      alert("failed to save changes");
-    } else {
+    if (status === 200) {
       localStorage.setItem(localStorageKey, newDataStr);
+    } else {
+      alert("failed to save changes");
     }
+
   } catch (err) {
     alert("network error: " + err.toString());
-  }
 
+  } finally {
+    if (localTestMode) {
+      localStorage.setItem(localStorageKey, newDataStr);
+    }
+  }
 }
 
 
