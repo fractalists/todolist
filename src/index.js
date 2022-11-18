@@ -116,7 +116,9 @@ function undoTodos() {
   
   dataset.historyIndex++
   testingLog("[undoTodos] current historyIndex is: " + dataset.historyIndex)
-  saveTodos(JSON.stringify(dataset));
+  let datasetStr = JSON.stringify(dataset)
+  localStorage.setItem(localStorageKey, datasetStr);
+  saveTodos(datasetStr);
   return true
 }
 
@@ -128,7 +130,9 @@ function redoTodos() {
 
   dataset.historyIndex--
   testingLog("[redoTodos] current historyIndex is: " + dataset.historyIndex)
-  saveTodos(JSON.stringify(dataset));
+  let datasetStr = JSON.stringify(dataset)
+  localStorage.setItem(localStorageKey, datasetStr);
+  saveTodos(datasetStr);
   return true
 }
 
